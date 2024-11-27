@@ -19,6 +19,7 @@ export async function download({ Tezos, cid }) {
 
   const metadataBytes = hexToUint8Array(metadataHex);
   const headers = decodeHeaders(metadataBytes);
+  console.log(headers)
 
   const fileData = hexToUint8Array(contentHex);
 

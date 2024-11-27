@@ -1,0 +1,20 @@
+{
+  "name": "onchfs-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@taquito/signer": "^20.1.0",
+    "@taquito/taquito": "^20.1.0",
+    "hpack": "^1.0.0",
+    "js-sha3": "^0.9.3",
+    "onchfs": "^0.0.0",
+    "tiny-env-config": "^1.0.0"
+  }
+}

@@ -15,6 +15,7 @@
     "hpack": "^1.0.0",
     "js-sha3": "^0.9.3",
     "mime": "^4.0.4",
+    "minimist": "^1.2.8",
     "onchfs": "file:../onchfs/packages/onchfs-js",
     "tiny-env-config": "^1.0.0"
   }

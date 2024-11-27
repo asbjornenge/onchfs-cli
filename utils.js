@@ -12,6 +12,24 @@ export function encodeHeaders(headers) {
   return encoded;
 }
 
+export function decodeHeaders(headers) {
+  const hp = new hpack();
+  const decoded = hp.decode(headers);
+  return decoded;
+}
+
+export function hexToUint8Array(hexString) {
+  if (hexString.startsWith('0x')) {
+    hexString = hexString.slice(2);
+  }
+  const bytes = new Uint8Array(hexString.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
+  }
+  return bytes;
+}
+
+
 export async function writeInscriptions(Tezos, batch, onchfsContract) {
   try {
     let batchBuilder = Tezos.contract.batch();

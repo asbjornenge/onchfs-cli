@@ -11,26 +11,9 @@
 
 ## Installation
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/asbjornenge/onchfs-cli.git
-   cd onchfs-cli
-   ```
-
-2. **Install Dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables:**
-   
-   Create a `.env` file in the root directory and set the following variables:
-   ```
-   TEZOS_RPC=https://ghostnet.smartpy.io
-   TEZOS_PRIVATE_KEY=your_private_key_here
-   ONCHFS_CONTRACT_ADDRESS=KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q
-   MAX_FILE_SIZE=32000
-   ```
+```
+npm install -g onchfs-cli
+```
 
 ## Usage
 

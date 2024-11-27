@@ -4,7 +4,8 @@ import mime from 'mime'
 import sha3 from 'js-sha3'
 import onchfs from 'onchfs'
 import {
-  ONCHFS_CONTRACT_ADDRESS
+  ONCHFS_CONTRACT_ADDRESS,
+  MAX_FILE_SIZE
 } from './config.js'
 import { 
   encodeHeaders,
@@ -14,6 +15,12 @@ import {
 const { keccak256 } = sha3;
 
 export async function upload({ Tezos, filePath }) {
+
+    const stats = fs.statSync(filePath);
+    if (stats.size > MAX_FILE_SIZE) {
+        console.error(`Error: File size exceeds the limit of ${MAX_FILE_SIZE} bytes.`);
+        process.exit(1);
+    }
 
     // Read file content
     const bytes = fs.readFileSync(filePath);
@@ -51,4 +58,4 @@ export async function upload({ Tezos, filePath }) {
     }
 
     console.log('File upload completed successfully.');
-}
+}   

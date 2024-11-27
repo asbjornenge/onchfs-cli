@@ -22,6 +22,5 @@ export async function download({ Tezos, cid }) {
 
   const fileData = hexToUint8Array(contentHex);
 
-  // console.log the file 
-  console.log(Buffer.from(fileData).toString('utf-8'))
+  process.stdout.write(Buffer.from(fileData).toString('utf-8'));
 }

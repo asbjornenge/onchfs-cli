@@ -1,3 +1,4 @@
+import zlib from 'zlib';
 import onchfs from 'onchfs'
 import {
   ONCHFS_CONTRACT_ADDRESS
@@ -19,9 +20,11 @@ export async function download({ Tezos, cid }) {
 
   const metadataBytes = hexToUint8Array(metadataHex);
   const headers = decodeHeaders(metadataBytes);
-  console.log(headers)
 
   const fileData = hexToUint8Array(contentHex);
+  const isGzipped = headers.filter(h => h[0] === 'content-encoding' && h[1] === 'gzip').length > 0
 
-  process.stdout.write(Buffer.from(fileData).toString('utf-8'));
+  let data = Buffer.from(fileData).toString('utf-8')
+  if (isGzipped) data = zlib.gunzipSync(Buffer.from(fileData))
+  process.stdout.write(data)
 }

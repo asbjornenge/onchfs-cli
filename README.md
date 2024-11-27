@@ -27,11 +27,6 @@ To upload a file to the onchfs network:
 onchfs put <file_path>
 ```
 
-**Example:**
-```bash
-onchfs put index.html
-```
-
 ### Download a File
 
 To download a file from the onchfs network using its CID:
@@ -40,18 +35,10 @@ To download a file from the onchfs network using its CID:
 onchfs get <cid>
 ```
 
-**Example:**
-```bash
-onchfs get 66aa60d77334e46ca630878c0b24f55f799682b38f7e5d7bfa97d5e421fe762d
-```
-
 ## Options
 
-- `-h, --help`: Show help information.
-
-**Example:**
-```bash
-onchfs --help
+```
+MISSING: ADD help text here
 ```
 
 ## Examples

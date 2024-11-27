@@ -1,10 +1,10 @@
-# OnchFS CLI
+# onchfs-cli
 
-OnchFS CLI is a command-line interface tool for interacting with the OnchFS decentralized file storage system on the Tezos blockchain. It allows users to upload and download files securely using Tezos smart contracts.
+`onchfs-cli` is a command-line interface tool for interacting with the [onchfs](https://onchfs.com/) decentralized file storage system on the Tezos blockchain. It allows users to upload and download files securely using Tezos smart contracts.
 
 ## Features
 
-- **Upload Files:** Upload files to the OnchFS network with ease.
+- **Upload Files:** Upload files to the onchfs network with ease.
 - **Download Files:** Retrieve files using their unique Content Identifier (CID).
 - **Batch Operations:** Efficiently handle large batches of inscriptions.
 - **Cost Estimation:** Automatically estimates the cost of uploads before proceeding.
@@ -13,7 +13,7 @@ OnchFS CLI is a command-line interface tool for interacting with the OnchFS dece
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/yourusername/onchfs-cli.git
+   git clone https://github.com/asbjornenge/onchfs-cli.git
    cd onchfs-cli
    ```
 
@@ -38,7 +38,7 @@ The CLI supports two primary operations: `put` to upload files and `get` to down
 
 ### Upload a File
 
-To upload a file to the OnchFS network:
+To upload a file to the onchfs network:
 
 ```bash
 onchfs put <file_path>
@@ -51,7 +51,7 @@ onchfs put index.html
 
 ### Download a File
 
-To download a file from the OnchFS network using its CID:
+To download a file from the onchfs network using its CID:
 
 ```bash
 onchfs get <cid>
@@ -83,33 +83,26 @@ onchfs --help
   onchfs get abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567abc890def1
   ```
 
-## Configuration
-
-Configuration is managed via environment variables. Ensure all required variables are set correctly in the `.env` file before using the CLI.
-
-- `TEZOS_RPC`: The Tezos node RPC URL.
-- `TEZOS_PRIVATE_KEY`: Your Tezos account private key.
-- `ONCHFS_CONTRACT_ADDRESS`: The address of the OnchFS smart contract.
-- `MAX_FILE_SIZE`: Maximum allowed file size for uploads in bytes.
-
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
 ## License
 
-This project is licensed under the ISC License.
+This project is licensed under the BSD License.
 
 ## Acknowledgements
 
 - [Taquito](https://tezostaquito.io/) for Tezos JavaScript libraries.
-- [OnchFS](https://onchfs.com/) for decentralized file storage solutions.
+- [onchfs](https://onchfs.com/) for decentralized file storage solutions.
 - Open-source community for continuous support and contributions.
 
 # Support
 
-For any issues or questions, please open an issue on the [GitHub repository](https://github.com/yourusername/onchfs-cli/issues).
+For any issues or questions, please open an issue on the [GitHub repository](https://github.com/asbjornenge/onchfs-cli/issues).
 
 # Author
 
-[Your Name](https://github.com/yourusername)
+[@asbjornenge](https://github.com/asbjornenge)
+
+enjoy.

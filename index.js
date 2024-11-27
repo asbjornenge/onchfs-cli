@@ -25,20 +25,19 @@ async function main() {
 
   // TODO: parse from README.md
   if (args.help) {
-    console.log(`
-    Usage: onchfs [options] [method] [files/cid]
+    console.log(`Usage: onchfs [options] [method] [file/cid]
 
     Options:
       -h, --help        Show help information
 
     Positional Arguments:
       method      put or get
-      files       files to upload 
+      file        file to upload 
       cid         cid to download
 
     Examples:
       onchfs put index.html 
-      onchfs --help
+      onchfs get 66aa60d77334e46ca630878c0b24f55f799682b38f7e5d7bfa97d5e421fe762d
     `)
     process.exit(0)
   }

@@ -16,50 +16,24 @@ import {
 const { keccak256 } = sha3;
 
 export async function upload({ Tezos, filePath }) {
+  const stats = fs.statSync(filePath);
+  if (stats.size > MAX_FILE_SIZE) {
+    console.error(`Error: File size exceeds the limit of ${MAX_FILE_SIZE} bytes.`);
+    process.exit(1);
+  }
 
-    // Check file size
-    const stats = fs.statSync(filePath);
-    if (stats.size > MAX_FILE_SIZE) {
-        console.error(`Error: File size exceeds the limit of ${MAX_FILE_SIZE} bytes.`);
-        process.exit(1);
-    }
+  const bytes = fs.readFileSync(filePath)
+  const data = new Uint8Array(bytes)
+  const node = onchfs.files.prepare({ path: path.basename(filePath), content: data })
+  const fileCIDHex = uint8ArrayToHex(node.cid)
+  console.log('CID:', fileCIDHex);
 
-    // Get the OnchFS contract instance
-    const onchfsContract = await Tezos.contract.at(ONCHFS_CONTRACT_ADDRESS);
+  const inscriptions = await onchfs.inscriptions.prepare(node)
+  const batches = onchfs.inscriptions.batch(inscriptions, 32000)
 
+  for (const batch of batches) {
+    await writeInscriptions(Tezos, batch)
+  }
 
-    // Read file content
-    const bytes = fs.readFileSync(filePath);
-    const data = new Uint8Array(bytes);
-
-    // Encode headers using HPACK
-    // TODO: why :path?
-    const headers = { ':path': path.basename(filePath), 'content-type': mime.getType(filePath) };
-    const encodedHeaders = encodeHeaders(headers);
-
-    // Prepare the file node using onchfs
-    const node = onchfs.files.prepare({ path: path.basename(filePath), content: data, metadata: encodedHeaders });
-
-    // Extract the file CID from the node
-    const fileCIDHex = uint8ArrayToHex(node.cid);
-    console.log('File CID:', fileCIDHex);
-
-    // Prepare inscriptions
-    const inscriptions = await onchfs.inscriptions.prepare(node, {
-      getInode: async cid => {
-        // Implement getInode function as needed
-        return null; // For now, we assume the inode does not exist
-      },
-    });
-
-    // Batch inscriptions
-    const batches = onchfs.inscriptions.batch(inscriptions, 32000);
-
-
-    // Process each batch
-    for (const batch of batches) {
-      await writeInscriptions(Tezos, batch, onchfsContract);
-    }
-
-    console.log('File upload completed successfully.');
+  console.log('File upload completed successfully.');
 }   

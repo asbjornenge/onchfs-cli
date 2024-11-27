@@ -1,4 +1,7 @@
 import hpack from 'hpack'
+import {
+  ONCHFS_CONTRACT_ADDRESS,
+} from './config.js'
 
 export function uint8ArrayToHex(uint8Array) {
   return Array.from(uint8Array)
@@ -30,7 +33,9 @@ export function hexToUint8Array(hexString) {
 }
 
 
-export async function writeInscriptions(Tezos, batch, onchfsContract) {
+export async function writeInscriptions(Tezos, batch) {
+  const onchfsContract = await Tezos.contract.at(ONCHFS_CONTRACT_ADDRESS);
+
   let batchBuilder = Tezos.contract.batch();
 
   for (const inscription of batch) {

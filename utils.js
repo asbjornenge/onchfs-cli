@@ -31,37 +31,49 @@ export function hexToUint8Array(hexString) {
 
 
 export async function writeInscriptions(Tezos, batch, onchfsContract) {
-  try {
-    let batchBuilder = Tezos.contract.batch();
+  let batchBuilder = Tezos.contract.batch();
 
-    for (const inscription of batch) {
-      if (inscription.type === 'chunk') {
-        // Convert content to hex string
-        const dataHex = '0x' + uint8ArrayToHex(inscription.content);
-        // Add write_chunk operation to batch
-        batchBuilder = batchBuilder.withContractCall(onchfsContract.methods.write_chunk(dataHex));
-      } else if (inscription.type === 'file') {
-        // Convert chunks and metadata to required format
-        const chunkPointers = inscription.chunks.map(chunk => '0x' + uint8ArrayToHex(chunk));
-        const metadataHex = '0x' + uint8ArrayToHex(inscription.metadata);
-        // Add create_file operation to batch
-        batchBuilder = batchBuilder.withContractCall(
-          onchfsContract.methodsObject.create_file({
-            chunk_pointers: chunkPointers,
-            metadata: metadataHex,
-          })
-        );
-      }
+  for (const inscription of batch) {
+    if (inscription.type === 'chunk') {
+      // Convert content to hex string
+      const dataHex = '0x' + uint8ArrayToHex(inscription.content);
+      // Add write_chunk operation to batch
+      batchBuilder = batchBuilder.withContractCall(onchfsContract.methods.write_chunk(dataHex));
+    } else if (inscription.type === 'file') {
+      // Convert chunks and metadata to required format
+      const chunkPointers = inscription.chunks.map(chunk => '0x' + uint8ArrayToHex(chunk));
+      const metadataHex = '0x' + uint8ArrayToHex(inscription.metadata);
+      // Add create_file operation to batch
+      batchBuilder = batchBuilder.withContractCall(
+        onchfsContract.methodsObject.create_file({
+          chunk_pointers: chunkPointers,
+          metadata: metadataHex,
+        })
+      );
     }
-
-    // Send the batch operation
-    const batchOperation = await batchBuilder.send();
-
-    console.log(`Awaiting confirmation for batch operation ${batchOperation.hash}...`);
-    await batchOperation.confirmation();
-
-    console.log(`Batch operation completed with hash: ${batchOperation.hash}`);
-  } catch (error) {
-    console.error('Error writing inscriptions:', error);
   }
+
+  // Estimate
+  const estimates = await Tezos.estimate.batch(batchBuilder.operations);
+  const totalFeeMutez = estimates.reduce((sum, est) => sum + est.suggestedFeeMutez, 0);
+  const totalFeeInTez = totalFeeMutez / 1_000_000;
+
+  // Confirm cost
+  const confirmation = await new Promise((resolve) => {
+    console.log(`Estimated cost for uploading is ${totalFeeInTez} XTZ. Proceed? (yes/no)`);
+    process.stdin.on('data', (data) => {
+      const answer = data.toString().trim().toLowerCase();
+      resolve(answer === 'yes');
+    });
+  });
+
+  if (!confirmation) throw new Error('Upload cancelled by user')
+
+  // Send the batch operation
+  const batchOperation = await batchBuilder.send();
+
+  console.log(`Awaiting confirmation for batch operation ${batchOperation.hash}...`);
+  await batchOperation.confirmation();
+
+  console.log(`Batch operation completed with hash: ${batchOperation.hash}`);
 }

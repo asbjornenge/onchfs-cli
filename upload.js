@@ -5,7 +5,8 @@ import sha3 from 'js-sha3'
 import onchfs from 'onchfs'
 import {
   ONCHFS_CONTRACT_ADDRESS,
-  MAX_FILE_SIZE
+  MAX_FILE_SIZE,
+  TEZOS_RPC, // Add the Tezos RPC for cost calculation
 } from './config.js'
 import { 
   encodeHeaders,
@@ -16,11 +17,16 @@ const { keccak256 } = sha3;
 
 export async function upload({ Tezos, filePath }) {
 
+    // Check file size
     const stats = fs.statSync(filePath);
     if (stats.size > MAX_FILE_SIZE) {
         console.error(`Error: File size exceeds the limit of ${MAX_FILE_SIZE} bytes.`);
         process.exit(1);
     }
+
+    // Get the OnchFS contract instance
+    const onchfsContract = await Tezos.contract.at(ONCHFS_CONTRACT_ADDRESS);
+
 
     // Read file content
     const bytes = fs.readFileSync(filePath);
@@ -49,8 +55,6 @@ export async function upload({ Tezos, filePath }) {
     // Batch inscriptions
     const batches = onchfs.inscriptions.batch(inscriptions, 32000);
 
-    // Get the OnchFS contract instance
-    const onchfsContract = await Tezos.contract.at(ONCHFS_CONTRACT_ADDRESS);
 
     // Process each batch
     for (const batch of batches) {

@@ -6,6 +6,8 @@ import { upload } from './upload.js'
 import { download } from './download.js'
 import { prepareWallet } from './wallet.js'
 
+// TODO: mainnet and ghostnet
+
 if (!TEZOS_PRIVATE_KEY) {
   console.error('Please set environment variable TEZOS_PRIVATE_KEY.');
   process.exit(1);

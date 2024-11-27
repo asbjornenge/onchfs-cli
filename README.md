@@ -41,18 +41,6 @@ onchfs get <cid>
 MISSING: ADD help text here
 ```
 
-## Examples
-
-- **Uploading a File:**
-  ```bash
-  onchfs put example.pdf
-  ```
-
-- **Downloading a File:**
-  ```bash
-  onchfs get abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567abc890def1
-  ```
-
 ## Contributing
 
 Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.

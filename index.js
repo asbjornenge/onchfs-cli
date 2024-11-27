@@ -1,26 +1,29 @@
+import fs from 'fs' 
+import path from 'path'
+import mime from 'mime'
+import { TezosToolkit } from '@taquito/taquito'
+import { InMemorySigner } from  '@taquito/signer'
+import sha3 from 'js-sha3'
+import onchfs from 'onchfs'
 import {
   TEZOS_RPC,
   TEZOS_PRIVATE_KEY,
   ONCHFS_CONTRACT_ADDRESS
 } from './config.js'
-
-import fs from 'fs' 
-import path from 'path'
-import { TezosToolkit } from '@taquito/taquito'
-import { InMemorySigner } from  '@taquito/signer'
-import sha3 from 'js-sha3'
-import onchfs = from 'onchfs'
-import { uint8ArrayToHex } from './utils.js'
-import { encodeHeaders } from './hpack.js'
+import { 
+  encodeHeaders,
+  uint8ArrayToHex, 
+  writeInscriptions 
+} from './utils.js'
 const { keccak256 } = sha3;
 
-if (!TEZOS_PRIVATE_KEY || !ONCHFS_CONTRACT_ADDRESS) {
-  console.error('Please set TEZOS_PRIVATE_KEY and ONCHFS_CONTRACT_ADDRESS in your .env file.');
+if (!TEZOS_PRIVATE_KEY) {
+  console.error('Please set environment variable TEZOS_PRIVATE_KEY.');
   process.exit(1);
 }
 
 // Initialize Tezos toolkit
-const Tezos = new TezosToolkit(RPC_URL);
+const Tezos = new TezosToolkit(TEZOS_RPC);
 Tezos.setProvider({
   signer: new InMemorySigner(TEZOS_PRIVATE_KEY),
 });
@@ -39,7 +42,8 @@ async function main() {
     const data = new Uint8Array(bytes);
 
     // Encode headers using HPACK
-    const headers = { ':path': path.basename(filePath), 'content-type': 'text/markdown' };
+    // TODO: why :path?
+    const headers = { ':path': path.basename(filePath), 'content-type': mime.getType(filePath) };
     const encodedHeaders = encodeHeaders(headers);
 
     // Prepare the file node using onchfs
@@ -65,7 +69,7 @@ async function main() {
 
     // Process each batch
     for (const batch of batches) {
-      await writeInscriptions(batch, onchfsContract);
+      await writeInscriptions(Tezos, batch, onchfsContract);
     }
 
     console.log('File upload completed successfully.');
@@ -74,41 +78,6 @@ async function main() {
   }
 }
 
-async function writeInscriptions(batch, onchfsContract) {
-  try {
-    let batchBuilder = Tezos.contract.batch();
-
-    for (const inscription of batch) {
-      if (inscription.type === 'chunk') {
-        // Convert content to hex string
-        const dataHex = '0x' + uint8ArrayToHex(inscription.content);
-        // Add write_chunk operation to batch
-        batchBuilder = batchBuilder.withContractCall(onchfsContract.methods.write_chunk(dataHex));
-      } else if (inscription.type === 'file') {
-        // Convert chunks and metadata to required format
-        const chunkPointers = inscription.chunks.map(chunk => '0x' + uint8ArrayToHex(chunk));
-        const metadataHex = '0x' + uint8ArrayToHex(inscription.metadata);
-        // Add create_file operation to batch
-        batchBuilder = batchBuilder.withContractCall(
-          onchfsContract.methodsObject.create_file({
-            chunk_pointers: chunkPointers,
-            metadata: metadataHex,
-          })
-        );
-      }
-    }
-
-    // Send the batch operation
-    const batchOperation = await batchBuilder.send();
-
-    console.log(`Awaiting confirmation for batch operation ${batchOperation.hash}...`);
-    await batchOperation.confirmation();
-
-    console.log(`Batch operation completed with hash: ${batchOperation.hash}`);
-  } catch (error) {
-    console.error('Error writing inscriptions:', error);
-  }
-}
 
 main();
 

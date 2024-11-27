@@ -1,4 +1,5 @@
 import hpack from 'hpack'
+import readline from 'readline'
 import {
   ONCHFS_CONTRACT_ADDRESS,
 } from './config.js'
@@ -65,13 +66,16 @@ export async function writeInscriptions(Tezos, batch) {
 
   // Confirm cost
   const confirmation = await new Promise((resolve) => {
-    console.log(`Estimated cost for uploading is ${totalFeeInTez} XTZ. Proceed? (yes/no)`);
-    process.stdin.on('data', (data) => {
-      const answer = data.toString().trim().toLowerCase();
-      resolve(answer === 'yes');
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    rl.question(`Estimated cost for uploading is ${totalFeeInTez} XTZ. Proceed? (yes/no) `, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === 'yes');
     });
   });
-
   if (!confirmation) throw new Error('Upload cancelled by user')
 
   // Send the batch operation

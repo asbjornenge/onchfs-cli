@@ -1,14 +1,14 @@
 import { TezosToolkit } from '@taquito/taquito'
 import { InMemorySigner } from  '@taquito/signer'
 import {
-  TEZOS_RPC,
-  TEZOS_PRIVATE_KEY,
+  CONFIG,
+  ONCHFSCLI_TEZOS_PRIVATE_KEY
 } from './config.js'
 
 export function prepareWallet() {
-  const Tezos = new TezosToolkit(TEZOS_RPC);
+  const Tezos = new TezosToolkit(CONFIG.network.RPC);
   Tezos.setProvider({
-    signer: new InMemorySigner(TEZOS_PRIVATE_KEY),
+    signer: new InMemorySigner(ONCHFSCLI_TEZOS_PRIVATE_KEY),
   });
   return Tezos
 }

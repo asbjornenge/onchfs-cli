@@ -1,8 +1,6 @@
 import hpack from 'hpack'
 import readline from 'readline'
-import {
-  ONCHFS_CONTRACT_ADDRESS,
-} from './config.js'
+import { CONFIG } from './config.js'
 
 export function uint8ArrayToHex(uint8Array) {
   return Array.from(uint8Array)
@@ -35,7 +33,7 @@ export function hexToUint8Array(hexString) {
 
 
 export async function writeInscriptions(Tezos, batch) {
-  const onchfsContract = await Tezos.contract.at(ONCHFS_CONTRACT_ADDRESS);
+  const onchfsContract = await Tezos.contract.at(CONFIG.network.ONCHFS_CONTRACT_ADDRESS);
 
   let batchBuilder = Tezos.contract.batch();
 

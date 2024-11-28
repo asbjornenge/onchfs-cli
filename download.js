@@ -1,15 +1,13 @@
 import zlib from 'zlib';
 import onchfs from 'onchfs'
-import {
-  ONCHFS_CONTRACT_ADDRESS
-} from './config.js'
+import { CONFIG } from './config.js'
 import {
   decodeHeaders,
   hexToUint8Array 
 } from './utils.js'
 
 export async function download({ Tezos, cid }) {
-  const onchfsContract = await Tezos.contract.at(ONCHFS_CONTRACT_ADDRESS);
+  const onchfsContract = await Tezos.contract.at(CONFIG.network.ONCHFS_CONTRACT_ADDRESS);
 
   const fileInode = await onchfsContract.contractViews
     .read_file('0x' + cid)

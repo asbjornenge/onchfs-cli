@@ -1,24 +1,25 @@
 import minimist from 'minimist'
 import {
-  TEZOS_PRIVATE_KEY,
+  set_network,
+  ONCHFSCLI_TEZOS_PRIVATE_KEY
 } from './config.js'
 import { upload } from './upload.js'
 import { download } from './download.js'
 import { prepareWallet } from './wallet.js'
 
-// TODO: mainnet and ghostnet
+// TODO: mainnet and ghostnet <-
 
-if (!TEZOS_PRIVATE_KEY) {
-  console.error('Please set environment variable TEZOS_PRIVATE_KEY.');
+if (!ONCHFSCLI_TEZOS_PRIVATE_KEY) {
+  console.error('Please set environment variable ONCHFSCLI_TEZOS_PRIVATE_KEY.');
   process.exit(1);
 }
-const Tezos = prepareWallet()
 
 async function main() {
   const args = minimist(process.argv.slice(2), {
     boolean: [],
     alias: { 
       h: 'help',
+      n: 'network'
     },
     default: {
       h: false,
@@ -31,6 +32,9 @@ async function main() {
 
     Options:
       -h, --help        Show help information
+      -n, --network     Network to interact with (default: tezos:mainnet)
+                        tezos:mainnet
+                        tezos:ghostnet
 
     Positional Arguments:
       method      put or get
@@ -49,6 +53,8 @@ async function main() {
     process.exit(0)
   }
 
+  if (args.n) try { set_network(args.n) } catch(e) { console.error(e.message); process.exit(1) }
+
   const instruction = args._[0]
   const filePath = args._[1]
 
@@ -56,6 +62,8 @@ async function main() {
     console.log(`Unknown instruction ${instruction}. Supported instructions are put and get.`)
     process.exit(0)
   }
+
+  const Tezos = prepareWallet()
 
   try {
     switch(instruction) {
@@ -67,7 +75,7 @@ async function main() {
         break;
     }
   } catch (error) {
-    console.error(error)
+    console.error(error.message)
     process.exit(1)
   }
 }

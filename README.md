@@ -27,7 +27,23 @@ onchfs get <cid>
 ## Options
 
 ```
-MISSING: ADD help text here
+Usage: onchfs [options] [method] [file/cid]
+
+    Options:
+      -r, --rpc         Set a custom RPC endpoint
+      -h, --help        Show help information
+      -n, --network     Network to interact with (default: tezos:mainnet)
+                        tezos:mainnet
+                        tezos:ghostnet
+
+    Positional Arguments:
+      method      put or get
+      file        file to upload
+      cid         cid to download
+
+    Examples:
+      onchfs put index.html
+      onchfs get 66aa60d77334e46ca630878c0b24f55f799682b38f7e5d7bfa97d5e421fe762d
 ```
 
 ## Contributing

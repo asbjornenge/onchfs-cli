@@ -12,20 +12,6 @@ npm install -g onchfs-cli
 
 The CLI supports two primary operations: `put` to upload files and `get` to download files.
 
-To upload a file to the onchfs network:
-
-```bash
-onchfs put <file_path>
-```
-
-To download a file from the onchfs network using its CID:
-
-```bash
-onchfs get <cid>
-```
-
-## Options
-
 ```
 Usage: onchfs [options] [method] [file/cid]
 

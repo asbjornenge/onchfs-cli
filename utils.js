@@ -81,6 +81,4 @@ export async function writeInscriptions(Tezos, batch) {
 
   console.log(`Awaiting confirmation for batch operation ${batchOperation.hash}...`);
   await batchOperation.confirmation();
-
-  console.log(`Batch operation completed with hash: ${batchOperation.hash}`);
 }

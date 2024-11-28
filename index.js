@@ -1,6 +1,5 @@
 import minimist from 'minimist'
 import fs from 'fs'
-import path from 'path'
 import {
   set_config,
   set_network,

@@ -1,4 +1,6 @@
 import minimist from 'minimist'
+import fs from 'fs'
+import path from 'path'
 import {
   set_config,
   set_network,
@@ -7,8 +9,6 @@ import {
 import { upload } from './upload.js'
 import { download } from './download.js'
 import { prepareWallet } from './wallet.js'
-
-// TODO: mainnet and ghostnet <-
 
 if (!ONCHFSCLI_TEZOS_PRIVATE_KEY) {
   console.error('Please set environment variable ONCHFSCLI_TEZOS_PRIVATE_KEY.');
@@ -28,26 +28,10 @@ async function main() {
     }
   })
 
-  // TODO: parse from README.md
   if (args.help) {
-    console.log(`Usage: onchfs [options] [method] [file/cid]
-
-    Options:
-      -r, --rpc         Set a custom RPC endpoint 
-      -h, --help        Show help information
-      -n, --network     Network to interact with (default: tezos:mainnet)
-                        tezos:mainnet
-                        tezos:ghostnet
-
-    Positional Arguments:
-      method      put or get
-      file        file to upload 
-      cid         cid to download
-
-    Examples:
-      onchfs put index.html 
-      onchfs get 66aa60d77334e46ca630878c0b24f55f799682b38f7e5d7bfa97d5e421fe762d
-    `)
+    const readmeContent = fs.readFileSync(path.resolve(__dirname, 'README.md'), 'utf-8');
+    const usageSection = readmeContent.match(/## Usage([\s\S]*?)## Contributing/);
+    console.log(usageSection[1].trim());
     process.exit(0)
   }
 
@@ -85,4 +69,3 @@ async function main() {
 }
 
 main();
-

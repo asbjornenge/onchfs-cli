@@ -7,19 +7,20 @@ export const ONCHFSCLI_TEZOS_PRIVATE_KEY = config('ONCHFSCLI_TEZOS_PRIVATE_KEY',
 export const NETWORKS = {
   'tezos:mainnet': {
     'RPC': 'https://mainnet.smartpy.io',
-    'ONCHFS_CONTRACT_ADDRESS': 'KT1Ae7dT1gsLw2tRnUMXSCmEyF74KVkM6LUo'
+    'ONCHFS_CONTRACT_ADDRESS': 'KT1Ae7dT1gsLw2tRnUMXSCmEyF74KVkM6LUo',
+    'MAX_FILE_SIZE': 32000
   },
   'tezos:ghostnet': {
     'RPC': 'https://ghostnet.smartpy.io',
-    'ONCHFS_CONTRACT_ADDRESS': 'KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q'
+    'ONCHFS_CONTRACT_ADDRESS': 'KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q',
+    'MAX_FILE_SIZE': 32000
   }
 }
 
 // CONFIG Object
 export const CONFIG = {
   network: NETWORKS['tezos:mainnet'],
-  rpcs: [],
-  max_file_size: 32000 
+  rpcs: []
 }
 
 // Functions to set config

@@ -30,7 +30,7 @@ async function main() {
 
   if (args.help) {
     const readmeContent = fs.readFileSync('README.md', 'utf-8');
-    const usageSection = readmeContent.match(/## Usage([\s\S]*?)## Contributing/);
+    const usageSection = readmeContent.match(/## Usage[\s\S]*?```([\s\S]*?)```/);
     console.log(usageSection[1].trim());
     process.exit(0)
   }

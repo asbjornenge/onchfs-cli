@@ -7,7 +7,6 @@ import {
 
 export function prepareWallet() {
   const rpc = CONFIG.rpc || CONFIG.network.RPC
-  console.log(rpc)
   const Tezos = new TezosToolkit(rpc)
   Tezos.setProvider({
     signer: new InMemorySigner(ONCHFSCLI_TEZOS_PRIVATE_KEY),

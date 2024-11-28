@@ -29,7 +29,7 @@ async function main() {
   })
 
   if (args.help) {
-    const readmeContent = fs.readFileSync(path.resolve(__dirname, 'README.md'), 'utf-8');
+    const readmeContent = fs.readFileSync('README.md', 'utf-8');
     const usageSection = readmeContent.match(/## Usage([\s\S]*?)## Contributing/);
     console.log(usageSection[1].trim());
     process.exit(0)

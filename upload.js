@@ -64,7 +64,6 @@ export async function upload({ Tezos, filePath }) {
     })
 
     const node = onchfs.files.prepare(fileObjects)
-    return console.log(node)
     const dirCIDHex = uint8ArrayToHex(node.cid)
     console.log('Directory CID:', dirCIDHex);
 

@@ -54,6 +54,21 @@ export async function writeInscriptions(Tezos, batch) {
           metadata: metadataHex,
         })
       );
+    } else if (inscription.type === 'directory') {
+      // Convert files and cid to required format
+      console.log(inscription)
+      const filesHex = inscription.files.map(file => ({
+        path: file.path,
+        cid: '0x' + uint8ArrayToHex(file.cid)
+      }));
+      const cidHex = '0x' + uint8ArrayToHex(inscription.cid);
+      // Add create_directory operation to batch
+      batchBuilder = batchBuilder.withContractCall(
+        onchfsContract.methodsObject.create_directory({
+          files: filesHex,
+          cid: cidHex,
+        })
+      );
     }
   }
 
@@ -82,3 +97,4 @@ export async function writeInscriptions(Tezos, batch) {
   console.log(`Awaiting confirmation for batch operation ${batchOperation.hash}...`);
   await batchOperation.confirmation();
 }
+

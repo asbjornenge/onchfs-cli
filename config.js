@@ -20,7 +20,7 @@ export const NETWORKS = {
 // CONFIG Object
 export const CONFIG = {
   network: NETWORKS['tezos:mainnet'],
-  rpcs: []
+  rpc: null
 }
 
 // Functions to set config

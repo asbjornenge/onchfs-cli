@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import minimist from 'minimist'
 import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import {
   set_config,
   set_network,
@@ -9,6 +11,9 @@ import {
 import { upload } from './upload.js'
 import { download } from './download.js'
 import { prepareWallet } from './wallet.js'
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 if (!ONCHFSCLI_TEZOS_PRIVATE_KEY) {
   console.error('Please set environment variable ONCHFSCLI_TEZOS_PRIVATE_KEY.');
@@ -29,7 +34,7 @@ async function main() {
   })
 
   if (args.help) {
-    const readmeContent = fs.readFileSync('README.md', 'utf-8');
+    const readmeContent = fs.readFileSync(path.join(__dirname, 'README.md'), 'utf-8');
     const usageSection = readmeContent.match(/## Usage[\s\S]*?```([\s\S]*?)```/);
     console.log(usageSection[1].trim());
     process.exit(0)

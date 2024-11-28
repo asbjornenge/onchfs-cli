@@ -1,1 +1,1 @@
-document.getElementById('title').innerText = 'New Title from index.js';
+document.getElementById('title').innerText = 'onchfs & js ftw';

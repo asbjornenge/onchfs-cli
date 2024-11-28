@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import {
+  CONFIG,
   set_config,
   set_network,
   ONCHFSCLI_TEZOS_PRIVATE_KEY
@@ -57,6 +58,11 @@ async function main() {
   }
 
   const Tezos = prepareWallet()
+
+  if (instruction == 'put') {
+    console.log(`Network: ${CONFIG.network.key}`)
+    console.log(`RPC: ${CONFIG.rpc || CONFIG.network.RPC}`)
+  }
 
   try {
     switch(instruction) {

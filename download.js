@@ -53,6 +53,7 @@ export async function download({ Tezos, URI }) {
   const out = await onchfsContract.contractViews.get_inode_at({ cid, path }).executeView({ viewCaller: CONFIG.viewCaller })
   if (out.inode.directory) {
     const tree = await buildTree({ onchfsContract, cid: out.cid })
+    console.log(['⛓️'].concat(path).join('/'))
     console.log(treeify.asTree(tree, true))
   }
   else {

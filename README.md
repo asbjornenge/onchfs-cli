@@ -8,6 +8,14 @@
 npm install -g onchfs-cli
 ```
 
+## Setup
+
+In order to use the `onchfs` cli you need to set a Tezos wallet. For now we only support setting a privkey as env variable (yes yes, make a separate wallet only for this purpose OR sumbit a PR to make it more secure).
+
+```
+export ONCHFSCLI_TEZOS_PRIVATE_KEY edsk...
+```
+
 ## Usage
 
 The CLI supports two primary operations: `put` to upload files and `get` to download files.
@@ -32,9 +40,11 @@ Usage: onchfs [options] [method] [file/cid]
       onchfs get 66aa60d77334e46ca630878c0b24f55f799682b38f7e5d7bfa97d5e421fe762d
 ```
 
-## Contributing
+## TODO
 
-Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
+* Add ability to download dirs
+* Support more chains (will gladly accept PRs)
+* Use resolver instead of calling views for files & dirs? (would work cross-chain)
 
 ## License
 
@@ -44,10 +54,6 @@ This project is licensed under the BSD License.
 
 - [Taquito](https://tezostaquito.io/) - Tezos JavaScript libraries
 - [onchfs](https://onchfs.com/) - on-chain file storage system 
-
-# Support
-
-For any issues or questions, please open an issue on the [GitHub repository](https://github.com/asbjornenge/onchfs-cli/issues).
 
 # Author
 

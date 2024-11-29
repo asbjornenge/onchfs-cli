@@ -72,7 +72,7 @@ async function main() {
         await upload({ Tezos, filePath })
         break;
       case 'get':
-        await download({ Tezos, cid: filePath })
+        await download({ Tezos, URI: filePath })
         break;
     }
   } catch (error) {

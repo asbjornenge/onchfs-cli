@@ -1,5 +1,5 @@
 import zlib from 'zlib'
-import onchfs from 'onchfs'
+import onchfs from './onchfs.js'
 import treeify from 'treeify'
 import { CONFIG } from './config.js'
 import {

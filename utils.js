@@ -64,7 +64,6 @@ export async function writeInscriptions(Tezos, batch) {
       const filesMap = Object.fromEntries(
         Object.entries(inscription.files).map(([path, cid]) => [path, '0x' + uint8ArrayToHex(cid)])
       );
-      console.log(filesMap)
       // Add create_directory operation to batch
       batchBuilder = batchBuilder.withContractCall(
         onchfsContract.methodsObject.create_directory(filesMap)

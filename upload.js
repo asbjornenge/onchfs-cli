@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import mime from 'mime'
 import sha3 from 'js-sha3'
-import onchfs from 'onchfs'
+import onchfs from './onchfs.js'
 import { CONFIG } from './config.js'
 import { 
   encodeHeaders,

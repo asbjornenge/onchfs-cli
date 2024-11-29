@@ -17,7 +17,7 @@ npm install -g onchfs-cli
 In order to use the `onchfs` cli you need to set a Tezos wallet. For now we only support setting a privkey as env variable (yes yes, make a separate wallet only for this purpose OR sumbit a PR to make it more secure).
 
 ```
-export ONCHFSCLI_TEZOS_PRIVATE_KEY edsk...
+export ONCHFSCLI_TEZOS_PRIVATE_KEY=edsk...
 ```
 
 ## Usage

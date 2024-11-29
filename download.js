@@ -1,5 +1,6 @@
-import zlib from 'zlib';
+import zlib from 'zlib'
 import onchfs from 'onchfs'
+import treeify from 'treeify'
 import { CONFIG } from './config.js'
 import {
   decodeHeaders,
@@ -23,12 +24,21 @@ async function read_file({ onchfsContract, cid }) {
   process.stdout.write(data)
 }
 
-async function read_dir({ onchfsContract, out }) {
+async function read_dir({ onchfsContract, out, root }) {
   const files = {}
   for (const [name, pointer] of out.inode.directory.entries()) {
     files[name] = pointer
   }
   console.log(files)
+  // If a single files that also is a directory, get that instead.
+  if (Object.keys(files).length === 1) {
+    const cid = '0x'+Object.values(files)[0]
+    const _out = await onchfsContract.contractViews.get_inode_at({ cid, path: [] }).executeView({ viewCaller: CONFIG.viewCaller })
+    const root = Object.keys(files)[0]
+    if (_out.inode.directory) return await read_dir({ onchfsContract, out: _out, root }) // NOTE: could this inf loop?
+  } 
+  console.log(root)
+  console.log(treeify.asTree(files, true))
 }
 
 export async function download({ Tezos, URI }) {
@@ -38,6 +48,6 @@ export async function download({ Tezos, URI }) {
   const path = rpath.split('/').slice(1).filter(p => p != '')
   const cid = '0x' + rpath.split('/')[0]
   const out = await onchfsContract.contractViews.get_inode_at({ cid, path }).executeView({ viewCaller: CONFIG.viewCaller })
-  if (out.inode.directory) await read_dir({ onchfsContract, out })
+  if (out.inode.directory) await read_dir({ onchfsContract, out, root: path.join('/') })
   else await read_file({ onchfsContract, cid: out.cid })
 }

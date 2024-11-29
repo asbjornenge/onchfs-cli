@@ -22,7 +22,8 @@ export const NETWORKS = {
 // CONFIG Object
 export const CONFIG = {
   network: NETWORKS['tezos:mainnet'],
-  rpc: null
+  rpc: null,
+  viewCaller: 'tz1burnburnburnburnburnburnburjAYjjX'
 }
 
 // Functions to set config

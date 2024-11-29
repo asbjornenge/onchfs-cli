@@ -21,6 +21,7 @@
     "minimist": "^1.2.8",
     "onchfs": "file:../onchfs/packages/onchfs-js",
     "readline": "^1.3.0",
-    "tiny-env-config": "^1.0.0"
+    "tiny-env-config": "^1.0.0",
+    "treeify": "^1.1.0"
   }
 }

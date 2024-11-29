@@ -1,6 +1,10 @@
 # onchfs-cli
 
-`onchfs-cli` is a command-line interface tool for interacting with the [onchfs](https://onchfs.com/) on-chain file storage system on the Tezos blockchain. It allows users to upload and download files securely using Tezos smart contracts.
+`onchfs-cli` is a cli tool for interacting with the [onchfs](https://onchfs.com/) - an on-chain file storage system developed by [fxhash](https://fxhash.xyz). It allows users to upload and download files securely using Tezos smart contracts.
+
+** WIP **
+
+For now, we only support the [Tezos](https://tezos.com) blockchain. But would accept PRs for more chains.
 
 ## Installation
 

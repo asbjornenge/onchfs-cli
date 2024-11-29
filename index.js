@@ -13,6 +13,8 @@ import { upload } from './upload.js'
 import { download } from './download.js'
 import { prepareWallet } from './wallet.js'
 
+// TODO: MAX_FILE_SIZE is that for files or just for chunks?
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

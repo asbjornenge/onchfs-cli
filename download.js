@@ -17,37 +17,45 @@ async function read_file({ onchfsContract, cid }) {
   const metadataBytes = hexToUint8Array(metadataHex);
   const headers = decodeHeaders(metadataBytes);
   const fileData = hexToUint8Array(contentHex);
-  const isGzipped = headers.filter(h => h[0] === 'content-encoding' && h[1] === 'gzip').length > 0
+  const isGzipped = headers.some(h => h[0] === 'content-encoding' && h[1] === 'gzip')
 
   let data = Buffer.from(fileData).toString('utf-8')
   if (isGzipped) data = zlib.gunzipSync(Buffer.from(fileData))
   process.stdout.write(data)
 }
 
-async function read_dir({ onchfsContract, out, root }) {
-  const files = {}
-  for (const [name, pointer] of out.inode.directory.entries()) {
-    files[name] = pointer
+async function buildTree({ onchfsContract, cid }) {
+  const inode = await onchfsContract.contractViews.get_inode_at({ cid, path: [] }).executeView({ viewCaller: CONFIG.viewCaller })
+  if (!inode.inode.directory) {
+    return {}
   }
-  console.log(files)
-  // If a single files that also is a directory, get that instead.
-  if (Object.keys(files).length === 1) {
-    const cid = '0x'+Object.values(files)[0]
-    const _out = await onchfsContract.contractViews.get_inode_at({ cid, path: [] }).executeView({ viewCaller: CONFIG.viewCaller })
-    const root = Object.keys(files)[0]
-    if (_out.inode.directory) return await read_dir({ onchfsContract, out: _out, root }) // NOTE: could this inf loop?
-  } 
-  console.log(root)
-  console.log(treeify.asTree(files, true))
+
+  const tree = {}
+  for (const [name, pointer] of inode.inode.directory.entries()) {
+    const childCid = '0x' + pointer
+    const childInode = await onchfsContract.contractViews.get_inode_at({ cid: childCid, path: [] }).executeView({ viewCaller: CONFIG.viewCaller })
+    if (childInode.inode.directory) {
+      tree[name] = await buildTree({ onchfsContract, cid: childCid })
+    } else {
+      tree[name] = pointer
+    }
+  }
+  return tree
 }
 
 export async function download({ Tezos, URI }) {
   if (!URI.startsWith('onchfs://')) throw new Error('Invalid URI. Must start with onchfs://')
   const onchfsContract = await Tezos.contract.at(CONFIG.network.ONCHFS_CONTRACT_ADDRESS);
   const rpath = URI.split('onchfs://')[1]
-  const path = rpath.split('/').slice(1).filter(p => p != '')
-  const cid = '0x' + rpath.split('/')[0]
+  const pathSegments = rpath.split('/')
+  const cid = '0x' + pathSegments[0]
+  const path = pathSegments.slice(1).filter(p => p != '')
   const out = await onchfsContract.contractViews.get_inode_at({ cid, path }).executeView({ viewCaller: CONFIG.viewCaller })
-  if (out.inode.directory) await read_dir({ onchfsContract, out, root: path.join('/') })
-  else await read_file({ onchfsContract, cid: out.cid })
+  if (out.inode.directory) {
+    const tree = await buildTree({ onchfsContract, cid: out.cid })
+    console.log(treeify.asTree(tree, true))
+  }
+  else {
+    await read_file({ onchfsContract, cid: out.cid })
+  }
 }

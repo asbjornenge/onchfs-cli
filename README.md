@@ -24,6 +24,8 @@ export ONCHFSCLI_TEZOS_PRIVATE_KEY=edsk...
 
 The CLI supports two primary operations: `put` to upload files and `get` to download files.
 
+![demo](onchfs.gif)
+
 ```
 Usage: onchfs [options] [method] [file/cid]
 

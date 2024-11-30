@@ -13,8 +13,6 @@ import { upload } from './upload.js'
 import { download } from './download.js'
 import { prepareWallet } from './wallet.js'
 
-// TODO: Is MAX_FILE_SIZE meant for chunks for files? 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -29,12 +27,20 @@ async function main() {
     alias: { 
       r: 'rpc',
       h: 'help',
-      n: 'network'
+      n: 'network',
+      v: 'version'
     },
     default: {
       h: false,
+      v: false,
     }
   })
+
+  if (args.version) {
+    const pkgjson = fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8');
+    console.log(`Version: ${JSON.parse(pkgjson).version}`);
+    process.exit(0);
+  }
 
   if (args.help) {
     const readmeContent = fs.readFileSync(path.join(__dirname, 'README.md'), 'utf-8');
@@ -82,3 +88,4 @@ async function main() {
 }
 
 main();
+

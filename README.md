@@ -32,6 +32,7 @@ Usage: onchfs [options] [method] [file/cid]
     Options:
       -r, --rpc         Set a custom RPC endpoint
       -h, --help        Show help information
+      -v, --version     Show version 
       -n, --network     Network to interact with (default: tezos:mainnet)
                         tezos:mainnet
                         tezos:ghostnet

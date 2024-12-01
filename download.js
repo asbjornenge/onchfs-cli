@@ -35,7 +35,7 @@ async function buildTree({ onchfsContract, cid }) {
     const childCid = '0x' + pointer
     const childInode = await onchfsContract.contractViews.get_inode_at({ cid: childCid, path: [] }).executeView({ viewCaller: CONFIG.viewCaller })
     if (childInode.inode.directory) {
-      tree[name] = await buildTree({ onchfsContract, cid: childCid })
+      tree[name + `: ${pointer}`] = await buildTree({ onchfsContract, cid: childCid })
     } else {
       tree[name] = pointer
     }
@@ -53,7 +53,7 @@ export async function download({ Tezos, URI }) {
   const out = await onchfsContract.contractViews.get_inode_at({ cid, path }).executeView({ viewCaller: CONFIG.viewCaller })
   if (out.inode.directory) {
     const tree = await buildTree({ onchfsContract, cid: out.cid })
-    console.log(['⛓️'].concat(path).join('/'))
+    console.log([`⛓️`].concat(path).join('/'))
     console.log(treeify.asTree(tree, true))
   }
   else {

@@ -23,7 +23,7 @@ if (!ONCHFSCLI_TEZOS_PRIVATE_KEY) {
 
 async function main() {
   const args = minimist(process.argv.slice(2), {
-    boolean: [],
+    boolean: ['h','v'],
     alias: { 
       r: 'rpc',
       h: 'help',

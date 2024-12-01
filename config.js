@@ -9,13 +9,13 @@ export const NETWORKS = {
     'key': 'tezos:mainnet',
     'RPC': 'https://mainnet.smartpy.io',
     'ONCHFS_CONTRACT_ADDRESS': 'KT1Ae7dT1gsLw2tRnUMXSCmEyF74KVkM6LUo',
-    'MAX_FILE_SIZE': 32000
+    'BATCH_SIZE_LIMIT': 32000
   },
   'tezos:ghostnet': {
     'key': 'tezos:ghostnet',
     'RPC': 'https://ghostnet.smartpy.io',
     'ONCHFS_CONTRACT_ADDRESS': 'KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q',
-    'MAX_FILE_SIZE': 32000
+    'BATCH_SIZE_LIMIT': 32000
   }
 }
 

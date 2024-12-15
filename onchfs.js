@@ -18,7 +18,7 @@ var INODE_BYTE_IDENTIFIER = {
 };
 var DEFAULT_CHUNK_SIZE = 16384;
 var DEFAULT_CONTRACTS = {
-  "tezos:mainnet": "KT1WvzYHCNBvDSdwafTHv7nJ1dWmZ8GCYuuC",
+  "tezos:mainnet": "KT1BFSXud4o9NLqauoxiB7oUHxS1wfaf98Gu",
   "tezos:ghostnet": "KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q",
   "ethereum:1": "b0e58801d1b4d69179b7bc23fe54a37cee999b09",
   "ethereum:5": "fcfdfa971803e1cc201f80d8e74de71fddea6551"
@@ -671,7 +671,7 @@ function createProxyResolver(controllers) {
                   cid,
                   path
                 }).executeView({
-                  viewCaller: "KT1Uktxf9dgGga6DRRNbGEDepxFGTwNtTg4y"
+                  viewCaller: "tz1burnburnburnburnburnburnburjAYjjX"
                 });
                 } catch(e) {
                   console.error(e)
@@ -699,7 +699,7 @@ function createProxyResolver(controllers) {
                 console.log(cid)
                 const kt = await KT(address);
                 const res = await kt.contractViews.read_file(cid).executeView({
-                  viewCaller: "KT1Uktxf9dgGga6DRRNbGEDepxFGTwNtTg4y"
+                  viewCaller: "tz1burnburnburnburnburnburnburjAYjjX"
                 });
                 return hexStringToBytes(res.content);
               }

@@ -8,7 +8,7 @@ export const NETWORKS = {
   'tezos:mainnet': {
     'key': 'tezos:mainnet',
     'RPC': 'https://mainnet.smartpy.io',
-    'ONCHFS_CONTRACT_ADDRESS': 'KT1Ae7dT1gsLw2tRnUMXSCmEyF74KVkM6LUo',
+    'ONCHFS_CONTRACT_ADDRESS': 'KT1BFSXud4o9NLqauoxiB7oUHxS1wfaf98Gu',
     'BATCH_SIZE_LIMIT': 32000
   },
   'tezos:ghostnet': {

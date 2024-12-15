@@ -33,10 +33,11 @@ export function hexToUint8Array(hexString) {
 
 export async function calcBatchCost(Tezos, batch) {
   const estimates = await Tezos.estimate.batch(batch.operations)
-  const totalFeeMutez = estimates.reduce((sum, est) => sum + est.suggestedFeeMutez, 0)
+  const totalFeeMutez = estimates.reduce((sum, est) => sum + est.suggestedFeeMutez + est.burnFeeMutez, 0)
   const totalFeeInTez = totalFeeMutez / 1_000_000;
   return totalFeeInTez
 }
+
 
 export async function confirmCost(totalFeeInTez) {
   const confirmation = await new Promise((resolve) => {

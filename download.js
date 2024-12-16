@@ -44,9 +44,8 @@ async function buildTree({ onchfsContract, cid }) {
 }
 
 export async function download({ Tezos, URI }) {
-  if (!URI.startsWith('onchfs://')) throw new Error('Invalid URI. Must start with onchfs://')
   const onchfsContract = await Tezos.contract.at(CONFIG.network.ONCHFS_CONTRACT_ADDRESS);
-  const rpath = URI.split('onchfs://')[1]
+  const rpath = URI.startsWith('onchfs://') ? URI.split('onchfs://')[1] : URI
   const pathSegments = rpath.split('/')
   const cid = '0x' + pathSegments[0]
   const path = pathSegments.slice(1).filter(p => p != '')

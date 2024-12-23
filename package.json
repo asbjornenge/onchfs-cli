@@ -15,6 +15,7 @@
   "dependencies": {
     "@taquito/signer": "^20.1.0",
     "@taquito/taquito": "^20.1.0",
+    "ethers": "^6.13.4",
     "hpack": "^1.0.0",
     "hpack.js": "^2.1.6",
     "js-sha3": "^0.9.3",

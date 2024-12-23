@@ -2,6 +2,14 @@ import hpack from 'hpack'
 import readline from 'readline'
 import { CONFIG } from './config.js'
 
+export function getRPC() {
+  return CONFIG.rpc || CONFIG.network.RPC
+}
+
+export function getNetwork() {
+  return CONFIG.network
+}
+
 export function uint8ArrayToHex(uint8Array) {
   return Array.from(uint8Array)
     .map(b => b.toString(16).padStart(2, '0'))

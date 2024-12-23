@@ -16,11 +16,6 @@ import { prepareWallet } from './wallet.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-if (!ONCHFSCLI_TEZOS_PRIVATE_KEY) {
-  console.error('Please set environment variable ONCHFSCLI_TEZOS_PRIVATE_KEY.');
-  process.exit(1);
-}
-
 async function main() {
   const args = minimist(process.argv.slice(2), {
     boolean: ['h','v'],

@@ -33,7 +33,6 @@ function getAllFilesSync(dirPath, arrayOfFiles = []) {
 export async function upload({ wallet, filePath }) {
   const network = getNetwork()
   const netname = network.key.split(':')[0]
-  console.log(netname)
   switch (netname) {
     case 'tezos':
       await uploadTezos({ Tezos: wallet, filePath, network })

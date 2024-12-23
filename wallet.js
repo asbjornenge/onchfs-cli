@@ -1,6 +1,6 @@
 import { TezosToolkit } from '@taquito/taquito'
 import { InMemorySigner } from  '@taquito/signer'
-import { ethers } from 'ethers'
+import { JsonRpcProvider, Wallet } from 'ethers'
 import {
   CONFIG,
   ONCHFSCLI_TEZOS_PRIVATE_KEY,
@@ -40,7 +40,7 @@ function prepareTezosWallet({ rpc }) {
 
 function prepareEthereumWallet({ rpc }) {
   if (!ONCHFSCLI_ETHEREUM_PRIVATE_KEY) throw new Error('Please set environment variable ONCHFSCLI_ETHEREUM_PRIVATE_KEY for Ethereum networks.')
-  const provider = new ethers.providers.JsonRpcProvider(rpc)
-  const wallet = new ethers.Wallet(ONCHFSCLI_ETHEREUM_PRIVATE_KEY, provider)
+  const provider = new JsonRpcProvider(rpc)
+  const wallet = new Wallet(ONCHFSCLI_ETHEREUM_PRIVATE_KEY, provider)
   return wallet
 }

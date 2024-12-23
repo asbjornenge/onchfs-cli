@@ -20,7 +20,7 @@ var DEFAULT_CHUNK_SIZE = 16384;
 var DEFAULT_CONTRACTS = {
   "tezos:mainnet": "KT1BFSXud4o9NLqauoxiB7oUHxS1wfaf98Gu",
   "tezos:ghostnet": "KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q",
-  "ethereum:1": "b0e58801d1b4d69179b7bc23fe54a37cee999b09",
+  "ethereum:1": "0xca11bde05977b3631167028862be2a173976ca11",
   "ethereum:5": "fcfdfa971803e1cc201f80d8e74de71fddea6551"
 };
 

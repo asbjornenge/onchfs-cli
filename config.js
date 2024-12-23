@@ -21,7 +21,7 @@ export const NETWORKS = {
   'ethereum:1': {
     'key': 'ethereum:1',
     'RPC': 'https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID',
-    'ONCHFS_CONTRACT_ADDRESS': '0xb0e58801d1b4d69179b7bc23fe54a37cee999b09',
+    'ONCHFS_CONTRACT_ADDRESS': '0xca11bde05977b3631167028862be2a173976ca11',
     'BATCH_SIZE_LIMIT': 32000
   },
   'ethereum:5': {

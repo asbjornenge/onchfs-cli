@@ -33,6 +33,7 @@ function getAllFilesSync(dirPath, arrayOfFiles = []) {
 export async function upload({ wallet, filePath }) {
   const network = getNetwork()
   const netname = network.key.split(':')[0]
+  console.log(netname)
   switch (netname) {
     case 'tezos':
       await uploadTezos({ Tezos: wallet, filePath, network })
@@ -95,17 +96,20 @@ export async function uploadTezos({ Tezos, filePath, network }) {
   }
 }   
 
+const MULTICALL3_ABI = [
+  "function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) public payable returns (bytes[] memory returnData)"
+]
+
+function getMulticall3Address(networkKey) {
+  return MULTICALL3_ADDRESSES[networkKey]
+}
+
 export async function uploadEthereum({ wallet, filePath, network }) {
   const provider = wallet.provider;
   const signer = wallet;
   const contractAddress = network.ONCHFS_CONTRACT_ADDRESS;
-  const contractABI = [
-    // Replace with the actual ABI of the ONCHFS contract
-    "function write_chunk(bytes32 chunk) public",
-    "function create_file(bytes32[] chunkPointers, bytes metadata) public",
-    "function create_directory(bytes32[] fileCIDs) public"
-  ];
-  const contract = new ethers.Contract(contractAddress, contractABI, signer);
+  const multicall = new ethers.Contract(contractAddress, MULTICALL3_ABI, signer)
+
 
   const stats = fs.statSync(filePath);
 
@@ -119,22 +123,19 @@ export async function uploadEthereum({ wallet, filePath, network }) {
     const inscriptions = await onchfs.inscriptions.prepare(node)
     const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT)
 
-    let totalGas = 0
-    for (const batch of batches) {
-      const gas = await contract.estimateGas.create_file(batch.chunkPointers, batch.metadata)
-      totalGas += gas.toNumber()
-    }
+    const calls = batches.map(batch => ({
+      target: contractAddress,
+      allowFailure: false,
+      callData: contract.interface.encodeFunctionData('create_file', [batch.chunkPointers, batch.metadata])
+    }))
 
-    console.log(`Estimated total gas cost: ${totalGas}`)
-    await confirmCost(totalGas)
+    const gas = await multicall.estimateGas.aggregate3(calls)
+    console.log(`Estimated total gas cost: ${gas.toNumber()}`)
+    await confirmCost(gas.toNumber())
 
-    for (const batch of batches) {
-      const tx = await contract.create_file(batch.chunkPointers, batch.metadata)
-      console.log(`Transaction sent: ${tx.hash}`)
-      await tx.wait()
-      console.log(`Transaction confirmed: ${tx.hash}`)
-    }
-
+    const tx = await multicall.aggregate3(calls, { gasLimit: gas.mul(2) })
+    console.log(`Transaction sent: ${tx.hash}`)
+    await tx.wait()
     console.log('File upload completed successfully.');
   } else if (stats.isDirectory()) {
     const files = getAllFilesSync(filePath)
@@ -152,26 +153,22 @@ export async function uploadEthereum({ wallet, filePath, network }) {
     const inscriptions = await onchfs.inscriptions.prepare(node)
     const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT)
 
-    let totalGas = 0
-    for (const batch of batches) {
-      const gas = await contract.estimateGas.create_directory(batch.fileCIDs)
-      totalGas += gas.toNumber()
-    }
+    const calls = batches.map(batch => ({
+      target: contractAddress,
+      allowFailure: false,
+      callData: contract.interface.encodeFunctionData('create_directory', [batch.fileCIDs])
+    }))
 
-    console.log(`Estimated total gas cost: ${totalGas}`)
-    await confirmCost(totalGas)
+    const gas = await multicall.estimateGas.aggregate3(calls)
+    console.log(`Estimated total gas cost: ${gas.toNumber()}`)
+    await confirmCost(gas.toNumber())
 
-    for (const batch of batches) {
-      const tx = await contract.create_directory(batch.fileCIDs)
-      console.log(`Transaction sent: ${tx.hash}`)
-      await tx.wait()
-      console.log(`Transaction confirmed: ${tx.hash}`)
-    }
-
+    const tx = await multicall.aggregate3(calls, { gasLimit: gas.mul(2) })
+    console.log(`Transaction sent: ${tx.hash}`)
+    await tx.wait()
     console.log('Directory upload completed successfully.');
   } else {
     console.error('Error: Path is neither a file nor a directory.');
     process.exit(1);
   }
 }
-

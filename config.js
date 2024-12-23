@@ -24,10 +24,10 @@ export const NETWORKS = {
     'ONCHFS_CONTRACT_ADDRESS': '0xca11bde05977b3631167028862be2a173976ca11',
     'BATCH_SIZE_LIMIT': 32000
   },
-  'ethereum:5': {
-    'key': 'ethereum:5',
-    'RPC': 'https://goerli.infura.io/v3/YOUR_INFURA_PROJECT_ID',
-    'ONCHFS_CONTRACT_ADDRESS': '0xfcfdfa971803e1cc201f80d8e74de71fddea6551',
+  'ethereum:sepolia': {
+    'key': 'ethereum:sepolia',
+    'RPC': 'https://ethereum-sepolia-rpc.publicnode.com',
+    'ONCHFS_CONTRACT_ADDRESS': '0x071d28fea2d5a204f8bd512704e66e659025f19e',
     'BATCH_SIZE_LIMIT': 32000
   }
 }

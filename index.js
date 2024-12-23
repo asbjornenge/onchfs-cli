@@ -6,8 +6,7 @@ import { fileURLToPath } from 'url'
 import {
   CONFIG,
   set_config,
-  set_network,
-  ONCHFSCLI_TEZOS_PRIVATE_KEY
+  set_network
 } from './config.js'
 import { upload } from './upload.js'
 import { download } from './download.js'
@@ -60,7 +59,7 @@ async function main() {
     process.exit(0)
   }
 
-  const Tezos = prepareWallet()
+  const wallet = prepareWallet()
 
   if (instruction == 'put') {
     console.log(`Network: ${CONFIG.network.key}`)
@@ -70,10 +69,10 @@ async function main() {
   try {
     switch(instruction) {
       case 'put':
-        await upload({ Tezos, filePath })
+        await upload({ wallet, filePath })
         break;
       case 'get':
-        await download({ Tezos, URI: filePath })
+        await download({ wallet, URI: filePath })
         break;
     }
   } catch (error) {

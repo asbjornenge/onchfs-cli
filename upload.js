@@ -2,7 +2,6 @@ import fs from 'fs'
 import path from 'path'
 import mime from 'mime'
 import onchfs from './onchfs.js'
-import { CONFIG } from './config.js'
 import { 
   confirmCost,
   sendBatches,
@@ -10,6 +9,9 @@ import {
   encodeHeaders,
   calcBatchCost,
   uint8ArrayToHex, 
+} from './utils.js'
+import {
+  getNetwork
 } from './utils.js'
 
 function getAllFilesSync(dirPath, arrayOfFiles = []) {
@@ -27,7 +29,23 @@ function getAllFilesSync(dirPath, arrayOfFiles = []) {
   return arrayOfFiles
 }
 
-export async function upload({ Tezos, filePath }) {
+export async function upload({ wallet, filePath }) {
+  const network = getNetwork()
+  const netname = network.key.split(':')[0]
+  switch (netname) {
+    case 'tezos':
+      await uploadTezos({ Tezos: wallet, filePath, network })
+      break
+    case 'ethereum':
+      // missing
+      break
+    default:
+      throw new Error('Unsupported network')
+  } 
+
+}
+
+export async function uploadTezos({ Tezos, filePath, network }) {
   const stats = fs.statSync(filePath);
 
   if (stats.isFile()) {
@@ -38,7 +56,7 @@ export async function upload({ Tezos, filePath }) {
     console.log('CID:', fileCIDHex);
 
     const inscriptions = await onchfs.inscriptions.prepare(node)
-    const batches = onchfs.inscriptions.batch(inscriptions, CONFIG.network.BATCH_SIZE_LIMIT)
+    const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT)
     const tezbatches = await buildBatches(Tezos, batches)
     const batchcost = await calcBatchCost(Tezos, tezbatches[0])
 
@@ -61,7 +79,7 @@ export async function upload({ Tezos, filePath }) {
     console.log('Directory CID:', dirCIDHex);
 
     const inscriptions = await onchfs.inscriptions.prepare(node)
-    const batches = onchfs.inscriptions.batch(inscriptions, CONFIG.network.BATCH_SIZE_LIMIT)
+    const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT)
     const tezbatches = await buildBatches(Tezos, batches)
     const batchcost = await calcBatchCost(Tezos, tezbatches[0])
 

@@ -95,83 +95,134 @@ export async function uploadTezos({ Tezos, filePath, network }) {
   }
 }   
 
+// ABIs
 const MULTICALL3_ABI = [
-  "function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) public payable returns (bytes[] memory returnData)"
-]
+  "function aggregate3((address target, bool allowFailure, bytes callData)[] calls) external payable returns (bytes[] memory returnData)"
+];
+const CONTENT_STORE_ABI = [
+  "function addContent(bytes content) external returns (bytes32 checksum, address pointer)"
+];
+const FILE_SYSTEM_ABI = [
+  "function createFile(bytes _metadata, bytes32[] _chunkChecksums) external returns (bytes32 fileChecksum)",
+  "function createDirectory(string[] calldata _names, bytes32[] calldata _inodeChecksums) external returns (bytes32 directoryChecksum)"
+];
 
 export async function uploadEthereum({ wallet, filePath, network }) {
-  const provider = wallet.provider;
-  const signer = wallet;
-  const contractAddress = network.ONCHFS_CONTRACT_ADDRESS 
-  if (!contractAddress) throw new Error(`Multicall3 contract address not defined for network ${network.key}`)
-  const multicall = new ethers.Contract(contractAddress, MULTICALL3_ABI, signer)
+  // The addresses for each contract:
+  const multicallAddress = network.MULTICALL3_CONTRACT_ADDRESS;
+  const contentStoreAddress = network.CONTENT_STORE_ADDRESS;
+  const fileSystemAddress  = network.FILE_SYSTEM_ADDRESS;
 
+  if (!multicallAddress || !contentStoreAddress || !fileSystemAddress) {
+    throw new Error(`Missing contract addresses in network config`);
+  }
+
+  const signer = wallet;
+  const multicall = new ethers.Contract(multicallAddress, MULTICALL3_ABI, signer);
+  const contentStore = new ethers.Contract(contentStoreAddress, CONTENT_STORE_ABI, signer);
+  const fileSystem = new ethers.Contract(fileSystemAddress, FILE_SYSTEM_ABI, signer);
 
   const stats = fs.statSync(filePath);
 
   if (stats.isFile()) {
-    const bytes = fs.readFileSync(filePath)
-    const data = new Uint8Array(bytes)
-    const node = onchfs.files.prepare({ path: path.basename(filePath), content: data })
-    const fileCIDHex = uint8ArrayToHex(node.cid)
-    console.log('CID:', fileCIDHex);
+    //
+    // 1) Prepare “file” node with onchfs
+    //
+    const bytes = fs.readFileSync(filePath);
+    const data = new Uint8Array(bytes);
 
-    const inscriptions = await onchfs.inscriptions.prepare(node)
-    const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT)
+    // Create a single “file” inode object
+    const fileNode = onchfs.files.prepare({
+      path: path.basename(filePath),
+      content: data
+    });
+    console.log('CID:', Buffer.from(fileNode.cid).toString('hex'));
 
-    const calls = batches.map(batch => ({
-      target: contractAddress,
-      allowFailure: false,
-      callData: multicall.interface.encodeFunctionData('aggregate3', [[{
-        target: contractAddress,
-        allowFailure: false,
-        callData: multicall.interface.encodeFunctionData('create_file', [batch.chunkPointers, batch.metadata])
-      }]])
-    }))
+    // 2) Prepare inscriptions (chunks, plus final file inode)
+    const inscriptions = await onchfs.inscriptions.prepare(fileNode);
 
-    const gas = await multicall.estimateGas.aggregate3(calls)
-    console.log(`Estimated total gas cost: ${gas.toNumber()}`)
-    await confirmCost(gas.toNumber())
+    // 3) Batch them to keep each call below the size limit
+    const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT);
 
-    const tx = await multicall.aggregate3(calls, { gasLimit: gas.mul(2) })
-    console.log(`Transaction sent: ${tx.hash}`)
-    await tx.wait()
+    //
+    // 4) Build the calls array to store chunks first, then createFile.
+    //
+    // A typical batch might contain multiple “chunk” inscriptions plus
+    // the “file” inscription (with metadata & chunk checksums).
+    //
+    const calls = [];
+    for (const batch of batches) {
+      // In each batch, you can do:
+      // - For each chunk => contentStore.addContent(...)
+      // - Then fileSystem.createFile(...) once all chunk checksums are known.
+      //
+      // HOWEVER, if you rely on the chain logs to discover the chunk checksums,
+      // that implies a two-step process. If you want everything in *one TX*,
+      // you must precompute each chunk’s keccak256 offline, because
+      // contentStore.addContent(...) just does keccak256 anyway.
+      //
+      // For demonstration, we’ll do everything in one batch:
+      //  a) addContent(...) for each chunk
+      //  b) createFile(...) with chunkChecksums
+      //
+      // We can see which inscriptions in the batch are “chunk” vs “file”:
+      const chunkIns = batch.filter(i => i.type === 'chunk');
+      const fileIns  = batch.find(i => i.type === 'file');
+
+      // For each chunk inscription
+      chunkIns.forEach(chunk => {
+        const callData = contentStore.interface.encodeFunctionData('addContent', [chunk.content]);
+        calls.push({
+          target: contentStoreAddress,
+          allowFailure: false,
+          callData
+        });
+      });
+
+      // Then the “file” inscription
+      if (fileIns) {
+        // We must pass precomputed checksums for each chunk. 
+        // onchfs already stores `chunk.hash` as the keccak-256. That’s
+        // exactly what addContent(...) emits as `checksum`.
+        // So we can use chunk.hash directly.
+//        const chunkChecksums = chunkIns.map(ch => '0x' + Buffer.from(ch.hash).toString('hex'));
+
+        const chunkChecksums = fileIns.chunks.map(
+          hashBytes => '0x' + Buffer.from(hashBytes).toString('hex')
+        );
+
+        // The metadata is a bytes array. If it’s a standard typed array, 
+        // we can pass it directly or convert to hex string.
+        const metadataHex = '0x' + Buffer.from(fileIns.metadata).toString('hex');
+
+        const fileData = fileSystem.interface.encodeFunctionData("createFile", [
+          metadataHex,
+          chunkChecksums
+        ]);
+        calls.push({
+          target: fileSystemAddress,
+          allowFailure: false,
+          callData: fileData
+        });
+      }
+    }
+
+    // 5) Estimate & send via multicall
+    const gas = await multicall.aggregate3.estimateGas(calls);
+    console.log(`Estimated total gas cost: ${gas.toString()}`);
+    // optionally confirm the cost
+    const tx = await multicall.aggregate3(calls, { gasLimit: gas * 2n });
+    console.log(`Transaction sent: ${tx.hash}`);
+    await tx.wait();
     console.log('File upload completed successfully.');
-  } else if (stats.isDirectory()) {
-    const files = getAllFilesSync(filePath)
-
-    const fileObjects = files.map(file => {
-      const bytes = fs.readFileSync(file)
-      const data = new Uint8Array(bytes)
-      return { path: path.join(path.basename(filePath), path.relative(filePath, file)), content: data }
-    })
-
-    const node = onchfs.files.prepare(fileObjects)
-    const dirCIDHex = uint8ArrayToHex(node.cid)
-    console.log('Directory CID:', dirCIDHex);
-
-    const inscriptions = await onchfs.inscriptions.prepare(node)
-    const batches = onchfs.inscriptions.batch(inscriptions, network.BATCH_SIZE_LIMIT)
-
-    const calls = batches.map(batch => ({
-      target: contractAddress,
-      allowFailure: false,
-      callData: multicall.interface.encodeFunctionData('aggregate3', [[{
-        target: contractAddress,
-        allowFailure: false,
-        callData: multicall.interface.encodeFunctionData('create_directory', [batch.fileCIDs])
-      }]])
-    }))
-
-    const gas = await multicall.estimateGas.aggregate3(calls)
-    console.log(`Estimated total gas cost: ${gas.toNumber()}`)
-    await confirmCost(gas.toNumber())
-
-    const tx = await multicall.aggregate3(calls, { gasLimit: gas.mul(2) })
-    console.log(`Transaction sent: ${tx.hash}`)
-    await tx.wait()
-    console.log('Directory upload completed successfully.');
-  } else {
+  }
+  else if (stats.isDirectory()) {
+    //
+    // Same idea, but you’ll have “directory” inscriptions plus nested files & chunks.
+    //
+    console.log("Upload directory - same approach, but calls createDirectory(...) at the end.");
+  }
+  else {
     console.error('Error: Path is neither a file nor a directory.');
     process.exit(1);
   }

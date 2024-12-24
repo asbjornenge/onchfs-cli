@@ -27,7 +27,10 @@ export const NETWORKS = {
   'ethereum:sepolia': {
     'key': 'ethereum:sepolia',
     'RPC': 'https://ethereum-sepolia-rpc.publicnode.com',
-    'ONCHFS_CONTRACT_ADDRESS': '0x071d28fea2d5a204f8bd512704e66e659025f19e',
+//    'ONCHFS_CONTRACT_ADDRESS': '0x071d28fea2d5a204f8bd512704e66e659025f19e',
+    'MULTICALL3_CONTRACT_ADDRESS': '0x071D28fEa2D5A204f8bd512704E66E659025F19e',
+    'CONTENT_STORE_ADDRESS': '0x070e5A608705aC4954eec054f9074eEe49bDcbfF', 
+    'FILE_SYSTEM_ADDRESS': '0x4f555d39e89f6d768f75831d610b3940fa94c6b1', 
     'BATCH_SIZE_LIMIT': 32000
   }
 }

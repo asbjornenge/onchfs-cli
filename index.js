@@ -76,7 +76,7 @@ async function main() {
         break;
     }
   } catch (error) {
-    console.error(error.message)
+    console.error(error)
     process.exit(1)
   }
 }

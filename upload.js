@@ -99,14 +99,11 @@ const MULTICALL3_ABI = [
   "function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) public payable returns (bytes[] memory returnData)"
 ]
 
-function getMulticall3Address(networkKey) {
-  return MULTICALL3_ADDRESSES[networkKey]
-}
-
 export async function uploadEthereum({ wallet, filePath, network }) {
   const provider = wallet.provider;
   const signer = wallet;
-  const contractAddress = network.ONCHFS_CONTRACT_ADDRESS;
+  const contractAddress = network.ONCHFS_CONTRACT_ADDRESS 
+  if (!contractAddress) throw new Error(`Multicall3 contract address not defined for network ${network.key}`)
   const multicall = new ethers.Contract(contractAddress, MULTICALL3_ABI, signer)
 
 
@@ -125,7 +122,11 @@ export async function uploadEthereum({ wallet, filePath, network }) {
     const calls = batches.map(batch => ({
       target: contractAddress,
       allowFailure: false,
-      callData: contract.interface.encodeFunctionData('create_file', [batch.chunkPointers, batch.metadata])
+      callData: multicall.interface.encodeFunctionData('aggregate3', [[{
+        target: contractAddress,
+        allowFailure: false,
+        callData: multicall.interface.encodeFunctionData('create_file', [batch.chunkPointers, batch.metadata])
+      }]])
     }))
 
     const gas = await multicall.estimateGas.aggregate3(calls)
@@ -155,7 +156,11 @@ export async function uploadEthereum({ wallet, filePath, network }) {
     const calls = batches.map(batch => ({
       target: contractAddress,
       allowFailure: false,
-      callData: contract.interface.encodeFunctionData('create_directory', [batch.fileCIDs])
+      callData: multicall.interface.encodeFunctionData('aggregate3', [[{
+        target: contractAddress,
+        allowFailure: false,
+        callData: multicall.interface.encodeFunctionData('create_directory', [batch.fileCIDs])
+      }]])
     }))
 
     const gas = await multicall.estimateGas.aggregate3(calls)
@@ -171,3 +176,4 @@ export async function uploadEthereum({ wallet, filePath, network }) {
     process.exit(1);
   }
 }
+

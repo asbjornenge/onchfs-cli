@@ -27,13 +27,15 @@ function getAllFilesSync(dirPath, arrayOfFiles = []) {
   return arrayOfFiles
 }
 
+const prepareOptions = () => ({ fileHashingStrategy: CONFIG.network.FILE_HASHING_STRATEGY })
+
 export async function upload({ Tezos, filePath }) {
   const stats = fs.statSync(filePath);
 
   if (stats.isFile()) {
     const bytes = fs.readFileSync(filePath)
     const data = new Uint8Array(bytes)
-    const node = onchfs.files.prepare({ path: path.basename(filePath), content: data })
+    const node = onchfs.files.prepare({ path: path.basename(filePath), content: data }, prepareOptions())
     const fileCIDHex = uint8ArrayToHex(node.cid)
     console.log('CID:', fileCIDHex);
 
@@ -56,7 +58,7 @@ export async function upload({ Tezos, filePath }) {
       return { path: path.join(path.basename(filePath), path.relative(filePath, file)), content: data }
     })
 
-    const node = onchfs.files.prepare(fileObjects)
+    const node = onchfs.files.prepare(fileObjects, prepareOptions())
     const dirCIDHex = uint8ArrayToHex(node.cid)
     console.log('Directory CID:', dirCIDHex);
 

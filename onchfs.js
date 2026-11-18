@@ -194,7 +194,7 @@ function encodeMetadata(metadata) {
 }
 
 // src/files/file.ts
-function prepareFile(file, chunkSize = DEFAULT_CHUNK_SIZE) {
+function prepareFile(file, chunkSize = DEFAULT_CHUNK_SIZE, fileHashingStrategy = "consistent") {
   const { path: name, content } = file;
   let metadata = {};
   let insertionBytes = content;
@@ -210,7 +210,7 @@ function prepareFile(file, chunkSize = DEFAULT_CHUNK_SIZE) {
   }
   const chunks = chunkBytes(insertionBytes, chunkSize);
   const metadataEncoded = encodeMetadata(metadata);
-  const contentHash = keccak(insertionBytes);
+  const contentHash = fileHashingStrategy === "cheap" ? keccak(concatUint8Arrays(...chunks.map((ch) => ch.hash))) : keccak(insertionBytes);
   const metadataHash = keccak(metadataEncoded);
   const cid = keccak(
     concatUint8Arrays(INODE_BYTE_IDENTIFIER.FILE, contentHash, metadataHash)
@@ -293,7 +293,7 @@ function buildDirectoryGraph(files) {
   }
   return [graph, leaves];
 }
-function prepareDirectory(files, chunkSize = DEFAULT_CHUNK_SIZE) {
+function prepareDirectory(files, chunkSize = DEFAULT_CHUNK_SIZE, fileHashingStrategy = "consistent") {
   const [graph, leaves] = buildDirectoryGraph(files);
   const parsed = [];
   let parsing = leaves;
@@ -308,7 +308,8 @@ function prepareDirectory(files, chunkSize = DEFAULT_CHUNK_SIZE) {
             path: node.name,
             content: node.content
           },
-          chunkSize
+          chunkSize,
+          fileHashingStrategy
         );
       } else if (node.type === "directory") {
         node.inode = computeDirectoryInode(node);
@@ -328,7 +329,8 @@ function prepareDirectory(files, chunkSize = DEFAULT_CHUNK_SIZE) {
 
 // src/files/prepare.ts
 var defaultPrepareOptions = {
-  chunkSize: DEFAULT_CHUNK_SIZE
+  chunkSize: DEFAULT_CHUNK_SIZE,
+  fileHashingStrategy: "consistent"
 };
 function prepare(files, options) {
   const _options = {
@@ -336,9 +338,9 @@ function prepare(files, options) {
     ...options || {}
   };
   if (Array.isArray(files)) {
-    return prepareDirectory(files, _options.chunkSize);
+    return prepareDirectory(files, _options.chunkSize, _options.fileHashingStrategy);
   } else {
-    return prepareFile(files, _options.chunkSize);
+    return prepareFile(files, _options.chunkSize, _options.fileHashingStrategy);
   }
 }
 

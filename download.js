@@ -43,13 +43,28 @@ async function buildTree({ onchfsContract, cid }) {
   return tree
 }
 
+// Try the network's contract first, then any older contracts (read-only fallback)
+async function resolveInode({ Tezos, cid, path }) {
+  const addresses = [CONFIG.network.ONCHFS_CONTRACT_ADDRESS, ...(CONFIG.network.FALLBACK_CONTRACTS || [])]
+  let lastError
+  for (const address of addresses) {
+    const onchfsContract = await Tezos.contract.at(address)
+    try {
+      const out = await onchfsContract.contractViews.get_inode_at({ cid, path }).executeView({ viewCaller: CONFIG.viewCaller })
+      return { onchfsContract, out }
+    } catch (e) {
+      lastError = e
+    }
+  }
+  throw lastError
+}
+
 export async function download({ Tezos, URI }) {
-  const onchfsContract = await Tezos.contract.at(CONFIG.network.ONCHFS_CONTRACT_ADDRESS);
   const rpath = URI.startsWith('onchfs://') ? URI.split('onchfs://')[1] : URI
   const pathSegments = rpath.split('/')
   const cid = '0x' + pathSegments[0]
   const path = pathSegments.slice(1).filter(p => p != '')
-  const out = await onchfsContract.contractViews.get_inode_at({ cid, path }).executeView({ viewCaller: CONFIG.viewCaller })
+  const { onchfsContract, out } = await resolveInode({ Tezos, cid, path })
   if (out.inode.directory) {
     const tree = await buildTree({ onchfsContract, cid: out.cid })
     console.log([`⛓️`].concat(path).join('/'))

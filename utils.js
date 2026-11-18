@@ -1,4 +1,5 @@
 import hpack from 'hpack'
+import { OpKind } from '@taquito/taquito'
 import readline from 'readline'
 import { CONFIG } from './config.js'
 
@@ -33,7 +34,8 @@ export function hexToUint8Array(hexString) {
 
 export async function calcBatchCost(Tezos, batch) {
   const estimates = await Tezos.estimate.batch(batch.operations)
-  const totalFeeMutez = estimates.reduce((sum, est) => sum + est.suggestedFeeMutez + est.burnFeeMutez, 0)
+  const multiplier = CONFIG.network.FEE_MULTIPLIER || 1
+  const totalFeeMutez = estimates.reduce((sum, est) => sum + Math.ceil(est.suggestedFeeMutez * multiplier) + est.burnFeeMutez, 0)
   const totalFeeInTez = totalFeeMutez / 1_000_000;
   return totalFeeInTez
 }
@@ -65,18 +67,17 @@ export async function buildBatches(Tezos, batches) {
 export async function buildBatch(Tezos, batch) {
   const onchfsContract = await Tezos.contract.at(CONFIG.network.ONCHFS_CONTRACT_ADDRESS);
 
-  let tezbatch = Tezos.contract.batch();
-
+  const calls = []
   for (const inscription of batch) {
     switch(inscription.type) {
       case 'chunk':
         const dataHex = '0x' + uint8ArrayToHex(inscription.content);
-        tezbatch = tezbatch.withContractCall(onchfsContract.methods.write_chunk(dataHex));
+        calls.push(onchfsContract.methods.write_chunk(dataHex));
         break
       case 'file':
         const chunkPointers = inscription.chunks.map(chunk => '0x' + uint8ArrayToHex(chunk));
         const metadataHex = '0x' + uint8ArrayToHex(inscription.metadata);
-        tezbatch = tezbatch.withContractCall(
+        calls.push(
           onchfsContract.methodsObject.create_file({
             chunk_pointers: chunkPointers,
             metadata: metadataHex,
@@ -87,14 +88,27 @@ export async function buildBatch(Tezos, batch) {
         const filesMap = Object.fromEntries(
           Object.entries(inscription.files).map(([path, cid]) => [path, '0x' + uint8ArrayToHex(cid)])
         );
-        tezbatch = tezbatch.withContractCall(
-          onchfsContract.methodsObject.create_directory(filesMap)
-        )
+        calls.push(onchfsContract.methodsObject.create_directory(filesMap))
         break
       }
     }
 
+  // Some networks (e.g. Etherlink/Tezos X) require higher fees than Taquito
+  // suggests; estimate and scale the fees explicitly.
+  const multiplier = CONFIG.network.FEE_MULTIPLIER
+  if (!multiplier) {
+    let tezbatch = Tezos.contract.batch();
+    for (const call of calls) tezbatch = tezbatch.withContractCall(call)
     return tezbatch
+  }
+  const params = calls.map(call => ({ kind: OpKind.TRANSACTION, ...call.toTransferParams() }))
+  const estimates = await Tezos.estimate.batch(params)
+  params.forEach((p, i) => {
+    p.fee = Math.ceil(estimates[i].suggestedFeeMutez * multiplier)
+    p.gasLimit = estimates[i].gasLimit
+    p.storageLimit = estimates[i].storageLimit
+  })
+  return Tezos.contract.batch(params)
 }
 
 export async function sendBatches(Tezos, batches) {

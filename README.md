@@ -34,7 +34,8 @@ Usage: onchfs [options] [method] [file/cid]
       -h, --help        Show help information
       -v, --version     Show version 
       -n, --network     Network to interact with (default: tezos:mainnet)
-                        tezos:mainnet
+                        tezos:mainnet   (Tezos L1)
+                        tezosx:mainnet  (Tezos X / Etherlink, Michelson interface)
                         tezos:ghostnet
 
     Positional Arguments:
@@ -46,6 +47,21 @@ Usage: onchfs [options] [method] [file/cid]
       onchfs put index.html
       onchfs get 66aa60d77334e46ca630878c0b24f55f799682b38f7e5d7bfa97d5e421fe762d
 ```
+
+## Networks and CIDs
+
+| network | contract | CIDs |
+|---|---|---|
+| `tezos:mainnet` | `KT1M3JKHiEzo8iLve8AWtRVHd1vW2jiCjXd1` | cheap |
+| `tezosx:mainnet` | `KT1JYZ2o6keUiTChNKUQnWDcMkjzES3djjRY` | cheap |
+| `tezos:ghostnet` | `KT1FA8AGGcJha6S6MqfBUiibwTaYhK8u7s9Q` | consistent |
+
+Mainnet contracts compute file CIDs from the chunk hashes ("cheap"), so the
+same file or directory gets the same CID on Tezos L1, Tezos X and the EVM
+onchfs contracts. See [onchfs-contracts](https://github.com/asbjornenge/onchfs-contracts).
+
+`get` on `tezos:mainnet` falls back to the previous contract
+(`KT1BFSXud4o9NLqauoxiB7oUHxS1wfaf98Gu`) for older CIDs.
 
 ## TODO
 
